@@ -4,10 +4,17 @@
     "node": ">=18 <19"
   },
   "scripts": {
-    "dev": "nitropack dev",
-    "build": "nitropack build"
+    "dev": "nitropack dev --port 2000",
+    "build": "nitropack build",
+    "preview": "node .output/server/index.mjs"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "jsonwebtoken": "^8.5.1",
+    "nitropack": "^1.0.0",
+    "ofetch": "^1.0.0"
   },
   "devDependencies": {
-    "nitropack": "^1.0.0"
+    "@types/node": "^18.11.17"
   }
 }
