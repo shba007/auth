@@ -1,33 +1,44 @@
+import JWT from "jsonwebtoken"
 import { createSignature, getGoogleUser } from "../../utils/helpers"
 
 export default defineEventHandler<{ authToken: string } | { accessToken: string, refreshToken: string }>(async (event) => {
-	const config = useRuntimeConfig()
-	const { code } = await readBody<{ code: string }>(event)
+  const config = useRuntimeConfig()
+  // if authToken uuid exist on the memory db
+  // else throw error
 
-	// get google user
-	const user = await getGoogleUser({ code, client_id: config.oauthGoogleId, client_secret: config.oauthGoogleSecret, redirect_uri: config.oauthGoogleRedirect })
-	const payload = { email: user.email }
+  // if the otp matches
+  // else send wrong otp
 
-	// if authToken uuid exist on the memory db
-	// else throw error
+  // if exist on the db send accessToken refreshToken
+  // else create authToken
+  const { code } = await readBody<{ code: string }>(event)
+  const user = await getGoogleUser({ code, client_id: config.oauthGoogleId, client_secret: config.oauthGoogleSecret, redirect_uri: config.oauthGoogleRedirect })
 
-	// if the otp matches
-	// else send wrong otp
+  try {
+    const payload = { email: user.email }
+    const response = await ofetch('/user/webhook', {
+      baseURL: config.apiURL, method: 'GET',
+      headers: { 'Signature': `${createSignature(payload, config.authWebhook)}` },
+      query: payload
+    })
+    const accessToken = JWT.sign({ id: response.id }, config.authAccessSecret)
+    const refreshToken = JWT.sign({ id: response.id }, config.authRefreshSecret)
 
-	// if exist on the db send accessToken refreshToken
-	// else create authToken
-	try {
-		const response = await ofetch('/user/webhook', {
-			baseURL: config.apiURL, method: 'GET',
-			headers: { 'Signature': `${createSignature(payload, config.authWebhook)}` },
-			query: payload
-		})
+    return { accessToken, refreshToken }
+  } catch (error) {
+    if (error.statusCode === 404) {
+      const payload = {
+        id: user.id,
+        name: user.name,
+        image: user.picture,
+        email: user.email,
+      }
+      console.log({ payload });
+      await useStorage().setItem(`user:${payload.id}`, payload)
+      const authToken = JWT.sign({ id: payload.id }, config.authSecret)
 
-		return { accessToken: "", refreshToken: "" }
-	} catch (error) {
-		if (error.statusCode === 404)
-			return { authToken: "" }
-		else
-			throw createError({ statusCode: 500, statusMessage: "Some Unknown Error" })
-	}
+      return { authToken }
+    } else
+      throw createError({ statusCode: 500, statusMessage: "Some Unknown Error" })
+  }
 })
