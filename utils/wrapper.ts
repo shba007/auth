@@ -1,12 +1,8 @@
 import JWT from "jsonwebtoken";
+import { UserInfo } from "./models";
 
 export function defineProtectedEventHandler<T>(
-  handler: (event: CompatibilityEvent, user: {
-    name: string | null,
-    image: string | null,
-    email: string | null,
-    phone: string
-  }) => T | Promise<T>
+  handler: (event: CompatibilityEvent, user: UserInfo) => T | Promise<T>
 ) {
   return defineEventHandler<T>(async (event) => {
     try {
@@ -17,9 +13,8 @@ export function defineProtectedEventHandler<T>(
         throw createError({ statusCode: 401, statusMessage: "Token Not found" })
 
       try {
-        const { id: userId } = JWT.verify(token, config.private.authSecret) as { id: string }
+        const { id: userId } = JWT.verify(token, config.authSecret) as { id: string }
         const user = await useStorage().getItem(`user:${userId}`)
-        console.log({ user });
 
         return handler(event, user)
       } catch (error) {

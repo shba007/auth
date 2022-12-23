@@ -1,14 +1,10 @@
 import JWT from "jsonwebtoken";
+import crypto from "node:crypto";
 import { getExpiryTimeFromNow } from '../../utils/helpers';
 import { generateOTP, sendOTP } from "../../utils/sms";
+import { AuthResponse, PhoneStatus } from "../../utils/models";
 
-interface PhoneStatus {
-  otp: number,
-  expiresIn: number,
-  retriesCount: number
-}
-
-export default defineEventHandler<{ authToken: string }>(async (event) => {
+export default defineEventHandler<AuthResponse>(async (event) => {
   // update user or create user
   // create uuid, authToken
   // create otp and store to db
@@ -18,10 +14,8 @@ export default defineEventHandler<{ authToken: string }>(async (event) => {
 
   const phoneStatus: PhoneStatus | null = await useStorage().getItem(`phone:${phone}`)
 
-  console.log({ phoneStatus });
-
   if (phoneStatus && new Date(phoneStatus.expiresIn).getTime() > new Date().getTime()) {
-    throw createError({ statusCode: 400, statusMessage: "OTP not expired" })
+    createError({ statusCode: 400, statusMessage: "OTP not expired" })
   }
 
   try {
@@ -30,13 +24,13 @@ export default defineEventHandler<{ authToken: string }>(async (event) => {
     let userId: string;
 
     if (token == null) {
-      // TODO: generate id
       const payload = {
-        id: "",
+        id: crypto.randomUUID(),
         phone: phone
       }
       userId = payload.id
 
+      console.log({ user: payload });
       await useStorage().setItem(`user:${userId}`, payload)
     } else {
       const { id } = JWT.verify(token, config.private.authSecret) as { id: string }
@@ -49,9 +43,8 @@ export default defineEventHandler<{ authToken: string }>(async (event) => {
 
     // Send OTP
     const otp = generateOTP()
-    const res = await sendOTP(otp, parseInt(phone))
-
-    console.log({ res });
+    // const res = await sendOTP(otp, parseInt(phone))
+    // console.log({ res });
 
     const newPhoneStatus = {
       otp: otp,
@@ -59,11 +52,12 @@ export default defineEventHandler<{ authToken: string }>(async (event) => {
       retriesCount: phoneStatus !== null ? phoneStatus.retriesCount++ : 0
     }
 
+    console.log({ newPhoneStatus });
     await useStorage().setItem(`phone:${phone}`, newPhoneStatus)
 
     const authToken = JWT.sign({ id: userId }, config.authSecret)
 
-    return { authToken }
+    return { isRegistered: false, token: { auth: authToken } }
   } catch (error) {
     console.log({ error });
 

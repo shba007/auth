@@ -1,7 +1,8 @@
 import JWT from "jsonwebtoken"
 import { createSignature, getGoogleUser } from "../../utils/helpers"
+import { AuthResponse } from "../../utils/models"
 
-export default defineEventHandler<{ authToken: string } | { accessToken: string, refreshToken: string }>(async (event) => {
+export default defineEventHandler<AuthResponse>(async (event) => {
   const config = useRuntimeConfig()
   // if authToken uuid exist on the memory db
   // else throw error
@@ -24,7 +25,7 @@ export default defineEventHandler<{ authToken: string } | { accessToken: string,
     const accessToken = JWT.sign({ id: response.id }, config.authAccessSecret)
     const refreshToken = JWT.sign({ id: response.id }, config.authRefreshSecret)
 
-    return { accessToken, refreshToken }
+    return { isRegistered: false, token: { access: accessToken, refresh: refreshToken } }
   } catch (error) {
     if (error.statusCode === 404) {
       const payload = {
@@ -37,7 +38,7 @@ export default defineEventHandler<{ authToken: string } | { accessToken: string,
       await useStorage().setItem(`user:${payload.id}`, payload)
       const authToken = JWT.sign({ id: payload.id }, config.authSecret)
 
-      return { authToken }
+      return { isRegistered: false, token: { auth: authToken } }
     } else
       throw createError({ statusCode: 500, statusMessage: "Some Unknown Error" })
   }
