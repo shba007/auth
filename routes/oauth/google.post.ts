@@ -22,6 +22,8 @@ export default defineEventHandler<AuthResponse>(async (event) => {
       headers: { 'Signature': `${createSignature(payload, config.authWebhook)}` },
       query: payload
     })
+    console.log({ response });
+
     const accessToken = JWT.sign({ id: response.id }, config.authAccessSecret)
     const refreshToken = JWT.sign({ id: response.id }, config.authRefreshSecret)
 

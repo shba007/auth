@@ -41,7 +41,7 @@ export default defineEventHandler<AuthResponse>(async (event) => {
       await useStorage().setItem(`user:${userId}`, user)
     }
 
-    // Send OTP
+    // TODO: Send OTP
     const otp = generateOTP()
     // const res = await sendOTP(otp, parseInt(phone))
     // console.log({ res });

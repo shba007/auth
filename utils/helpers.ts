@@ -1,5 +1,5 @@
 import { createHmac } from "node:crypto";
-import { decode } from "jsonwebtoken";
+import JWT from "jsonwebtoken";
 
 interface GoogleTokensResult {
   id_token: string;
@@ -93,7 +93,7 @@ export function getExpiryTimeFromNow({ days = 0, hour = 0, minute = 0, second = 
 }
 
 export function isTokenExpired(token: string) {
-  const decodedToken = decode(token)
+  const decodedToken = JWT.decode(token)
 
   if (typeof decodedToken === 'string' || decodedToken == undefined || decodedToken?.exp == undefined)
     return false
