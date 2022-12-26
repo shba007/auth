@@ -20,8 +20,8 @@ export function defineProtectedEventHandler<T>(
       } catch (error) {
         throw createError({ statusCode: 403, statusMessage: "Invalid Token" })
       }
-    } catch (err: any) {
-      sendError(event, err)
+    } catch (error: any) {
+      sendError(event, error)
     }
   })
 }

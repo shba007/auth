@@ -30,37 +30,37 @@ export default defineEventHandler<AuthResponse>(async (event) => {
       }
       userId = payload.id
 
-      console.log({ user: payload });
+      console.log(payload);
       await useStorage().setItem(`user:${userId}`, payload)
     } else {
       const { id } = JWT.verify(token, config.private.authSecret) as { id: string }
       const user = await useStorage().getItem(`user:${id}`)
       user.phone = phone
 
-      console.log({ user });
+      console.log(user);
       await useStorage().setItem(`user:${userId}`, user)
     }
 
     // TODO: Send OTP
     const otp = generateOTP()
-    // const res = await sendOTP(otp, parseInt(phone))
-    // console.log({ res });
+    const response = await sendOTP(otp, parseInt(phone))
+    // console.log({ response });
 
     const newPhoneStatus = {
-      otp: otp,
+      otp,
       expiresIn: getExpiryTimeFromNow({ minute: 3 }),
       retriesCount: phoneStatus !== null ? phoneStatus.retriesCount++ : 0
     }
 
-    console.log({ newPhoneStatus });
+    console.log(newPhoneStatus);
     await useStorage().setItem(`phone:${phone}`, newPhoneStatus)
 
     const authToken = JWT.sign({ id: userId }, config.authSecret)
 
     return { isRegistered: false, token: { auth: authToken } }
-  } catch (error) {
-    console.log({ error });
+  } catch (error: any) {
+    console.error("Auth phone/otp POST", error)
 
-    throw createError({ statusCode: 500, statusMessage: "Some Unknown Error" })
+    throw createError({ statusCode: 500, statusMessage: "Some Unknown Error Found" })
   }
 })

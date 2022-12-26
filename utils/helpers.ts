@@ -62,26 +62,26 @@ export async function getGoogleUser({ code, client_id, client_secret, redirect_u
   let access_token, id_token;
 
   try {
-    const res = await ofetch<GoogleTokensResult>("https://oauth2.googleapis.com/token", {
+    const response = await ofetch<GoogleTokensResult>("https://oauth2.googleapis.com/token", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: qs.toString(),
     });
-    access_token = res.access_token
-    id_token = res.id_token
+    access_token = response.access_token
+    id_token = response.id_token
 
-  } catch (error: any) {
+  } catch (error) {
     console.log("Error fetching Google Token", error);
   }
 
   try {
-    const res = await ofetch<GoogleUserResult>(`https://www.googleapis.com/oauth2/v2/userinfo?alt=json&access_token=${access_token}`, {
+    const response = await ofetch<GoogleUserResult>(`https://www.googleapis.com/oauth2/v2/userinfo?alt=json&access_token=${access_token}`, {
       method: "GET",
       headers: { "Authorization": `Bearer ${id_token}` },
     });
 
-    return res;
-  } catch (error: any) {
+    return response;
+  } catch (error) {
     console.log("Error fetching Google Token", error);
   }
 }
