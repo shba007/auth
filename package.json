@@ -4,9 +4,10 @@
     "node": ">=18 <19"
   },
   "scripts": {
-    "dev": "nitropack dev --port 2000",
+    "dev": "nitropack dev",
     "build": "nitropack build",
-    "preview": "node .output/server/index.mjs"
+    "preview": "node .output/server/index.mjs",
+    "clean": "rm -r .nitro .output"
   },
   "dependencies": {
     "cors": "^2.8.5",
