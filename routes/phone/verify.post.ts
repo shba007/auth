@@ -8,9 +8,9 @@ export default defineProtectedEventHandler<AuthResponse>(async (event, user) => 
   if (!user?.phone)
     throw createError({ statusCode: 400, statusMessage: "Send OTP First" })
 
-  console.log(user);
+  console.log({ user });
   const phoneStatus: PhoneStatus = await useStorage().getItem(`phone:${user.phone}`)
-  console.log(phoneStatus);
+  console.log({ phoneStatus });
 
   const { otp } = await readBody<{ otp: number }>(event)
 

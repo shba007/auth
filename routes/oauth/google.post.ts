@@ -42,9 +42,8 @@ export default defineEventHandler<AuthResponse>(async (event) => {
         const authToken = JWT.sign({ id: payload.id }, config.authSecret)
 
         return { isRegistered: false, token: { auth: authToken } }
-      }
-
-      throw error
+      } else
+        throw error
     }
   } catch (error: any) {
     console.error("Auth oauth/google GET", error)

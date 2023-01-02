@@ -10,8 +10,6 @@ export default defineProtectedEventHandler<AuthResponse>(async (event, user) => 
     if (!user)
       throw createError({ statusCode: 400, statusMessage: "OAuth or Phone number register first" })
 
-    console.log(user);
-
     const body = await readBody<{
       name: string | null,
       image: string | null,
@@ -35,19 +33,16 @@ export default defineProtectedEventHandler<AuthResponse>(async (event, user) => 
       headers: { 'Signature': `${createSignature(payload, config.authWebhook)}` },
       body: payload
     })
-    console.log({ response });
 
     const accessToken = JWT.sign({ id: response.id }, config.authAccessSecret)
     const refreshToken = JWT.sign({ id: response.id }, config.authRefreshSecret)
 
     return { isRegistered: true, token: { access: accessToken, refresh: refreshToken } }
   } catch (error: any) {
-    console.error("Auth register POST", error)
-
-    if (error.statusCode === 400) {
+    if (error.statusCode === 400)
       throw error
-    }
 
+    console.error("Auth register POST", error)
     throw createError({ statusCode: 500, statusMessage: "Some Unknown Error Found" })
   }
 })
