@@ -3,12 +3,12 @@ import { createSignature } from '../utils/helpers';
 import { AuthResponse } from "../utils/models";
 import { defineProtectedEventHandler } from '../utils/wrapper';
 
-export default defineProtectedEventHandler<AuthResponse>(async (event, user) => {
+export default defineProtectedEventHandler<Omit<AuthResponse, 'user'>>(async (event, user) => {
   const config = useRuntimeConfig()
 
   try {
     if (!user)
-      throw createError({ statusCode: 400, statusMessage: "OAuth or Phone number register first" })
+      throw createError({ statusCode: 400, statusMessage: "OAuth or SMS Login first" })
 
     const body = await readBody<{
       name: string | null,
@@ -25,7 +25,7 @@ export default defineProtectedEventHandler<AuthResponse>(async (event, user) => 
       dob: body.dob,
       gender: body.gender
     }
-    // TODO: payload checking
+    console.log({ user: payload });
 
     // create new account
     const response = await ofetch('/user/webhook', {
