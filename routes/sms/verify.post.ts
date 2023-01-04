@@ -38,7 +38,7 @@ export default defineProtectedEventHandler<AuthResponse>(async (event, user) => 
 
     return { isRegistered: true, token: { access: accessToken, refresh: refreshToken }, user: { phone: user.phone } }
   } catch (error: any) {
-    console.error("Auth phone/verify POST", error)
+    console.error("Auth sms/verify POST", error)
 
     if (error.statusCode === 401) {
       throw error

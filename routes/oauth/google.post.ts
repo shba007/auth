@@ -60,7 +60,7 @@ export default defineEventHandler<AuthResponse>(async (event) => {
         throw error
     }
   } catch (error: any) {
-    console.error("Auth oauth/google GET", error)
+    console.error("Auth oauth/google POST", error)
 
     if (error.statusCode === 404)
       throw error

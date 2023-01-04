@@ -52,7 +52,7 @@ export default defineEventHandler<Omit<AuthResponse, 'user'>>(async (event) => {
 
     return { isRegistered: false, token: { auth: authToken } }
   } catch (error: any) {
-    console.error("Auth phone/otp POST", error)
+    console.error("Auth sms/otp POST", error)
 
     throw createError({ statusCode: 500, statusMessage: "Some Unknown Error Found" })
   }
