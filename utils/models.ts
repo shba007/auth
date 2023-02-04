@@ -19,5 +19,10 @@ export interface AuthResponse {
   } | {
     access: string,
     refresh: string
+  }, user: {
+    name: string,
+    email: string,
+  } | {
+    phone: string,
   }
 }

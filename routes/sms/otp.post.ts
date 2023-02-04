@@ -4,7 +4,7 @@ import { getExpiryTimeFromNow } from '../../utils/helpers';
 import { generateOTP, sendOTP } from "../../utils/sms";
 import { AuthResponse, PhoneStatus } from "../../utils/models";
 
-export default defineEventHandler<AuthResponse>(async (event) => {
+export default defineEventHandler<Omit<AuthResponse, 'user'>>(async (event) => {
   // update user or create user
   // create uuid, authToken
   // create otp and store to db
@@ -14,37 +14,29 @@ export default defineEventHandler<AuthResponse>(async (event) => {
 
   const phoneStatus: PhoneStatus | null = await useStorage().getItem(`phone:${phone}`)
 
-  if (phoneStatus && new Date(phoneStatus.expiresIn).getTime() > new Date().getTime()) {
+  if (phoneStatus && new Date(phoneStatus.expiresIn).getTime() > new Date().getTime())
     createError({ statusCode: 400, statusMessage: "OTP not expired" })
-  }
 
   try {
     const authHeader = event.node.req.headers['authorization']
     const token = authHeader && authHeader.split(" ")[1]
-    let userId: string;
+    let user: { id: string, phone: string };
 
-    if (token == null) {
-      const payload = {
-        id: crypto.randomUUID(),
-        phone: phone
-      }
-      userId = payload.id
-
-      console.log(payload);
-      await useStorage().setItem(`user:${userId}`, payload)
-    } else {
-      const { id } = JWT.verify(token, config.private.authSecret) as { id: string }
-      const user = await useStorage().getItem(`user:${id}`)
+    if (!!token) {
+      const payload = JWT.verify(token, config.authSecret) as { id: string }
+      user = await useStorage().getItem(`user:${payload.id}`)
       user.phone = phone
-
-      console.log(user);
-      await useStorage().setItem(`user:${userId}`, user)
+    } else {
+      user = {
+        id: crypto.randomUUID(),
+        phone
+      }
     }
 
-    // TODO: Send OTP
+    await useStorage().setItem(`user:${user.id}`, user)
+
     const otp = generateOTP()
-    const response = await sendOTP(otp, parseInt(phone))
-    // console.log({ response });
+    // await sendOTP(otp, parseInt(phone))
 
     const newPhoneStatus = {
       otp,
@@ -52,14 +44,14 @@ export default defineEventHandler<AuthResponse>(async (event) => {
       retriesCount: phoneStatus !== null ? phoneStatus.retriesCount++ : 0
     }
 
-    console.log(newPhoneStatus);
+    console.log({ user, newPhoneStatus });
     await useStorage().setItem(`phone:${phone}`, newPhoneStatus)
 
-    const authToken = JWT.sign({ id: userId }, config.authSecret)
+    const authToken = JWT.sign({ id: user.id }, config.authSecret)
 
     return { isRegistered: false, token: { auth: authToken } }
   } catch (error: any) {
-    console.error("Auth phone/otp POST", error)
+    console.error("Auth sms/otp POST", error)
 
     throw createError({ statusCode: 500, statusMessage: "Some Unknown Error Found" })
   }

@@ -3,14 +3,12 @@ import { createSignature } from '../utils/helpers';
 import { AuthResponse } from "../utils/models";
 import { defineProtectedEventHandler } from '../utils/wrapper';
 
-export default defineProtectedEventHandler<AuthResponse>(async (event, user) => {
+export default defineProtectedEventHandler<Omit<AuthResponse, 'user'>>(async (event, user) => {
   const config = useRuntimeConfig()
 
   try {
     if (!user)
-      throw createError({ statusCode: 400, statusMessage: "OAuth or Phone number register first" })
-
-    console.log(user);
+      throw createError({ statusCode: 400, statusMessage: "OAuth or SMS Login first" })
 
     const body = await readBody<{
       name: string | null,
@@ -27,7 +25,7 @@ export default defineProtectedEventHandler<AuthResponse>(async (event, user) => 
       dob: body.dob,
       gender: body.gender
     }
-    // TODO: payload checking
+    console.log({ user: payload });
 
     // create new account
     const response = await ofetch('/user/webhook', {
@@ -35,19 +33,16 @@ export default defineProtectedEventHandler<AuthResponse>(async (event, user) => 
       headers: { 'Signature': `${createSignature(payload, config.authWebhook)}` },
       body: payload
     })
-    console.log({ response });
 
     const accessToken = JWT.sign({ id: response.id }, config.authAccessSecret)
     const refreshToken = JWT.sign({ id: response.id }, config.authRefreshSecret)
 
     return { isRegistered: true, token: { access: accessToken, refresh: refreshToken } }
   } catch (error: any) {
-    console.error("Auth register POST", error)
-
-    if (error.statusCode === 400) {
+    if (error.statusCode === 400)
       throw error
-    }
 
+    console.error("Auth register POST", error)
     throw createError({ statusCode: 500, statusMessage: "Some Unknown Error Found" })
   }
 })

@@ -25,7 +25,8 @@ export function createSignature(payload: any, secret: string) {
     .update(JSON.stringify(payload))
     .digest("hex");
 
-  // console.log(signature === digest ? "Digest Match\n" : "Digest don't Match\n", { signature, digest });
+  console.log("\npayload", payload, "secret", secret, "digest", digest);
+
   return digest
 }
 
@@ -71,7 +72,7 @@ export async function getGoogleUser({ code, client_id, client_secret, redirect_u
     id_token = response.id_token
 
   } catch (error) {
-    console.log("Error fetching Google Token", error);
+    console.error("Error fetching Google Token", error);
   }
 
   try {
@@ -82,7 +83,7 @@ export async function getGoogleUser({ code, client_id, client_secret, redirect_u
 
     return response;
   } catch (error) {
-    console.log("Error fetching Google Token", error);
+    console.error("Error fetching Google Token", error);
   }
 }
 

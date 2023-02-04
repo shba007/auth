@@ -28,7 +28,14 @@ export default defineEventHandler<AuthResponse>(async (event) => {
       const accessToken = JWT.sign({ id: response.id }, config.authAccessSecret)
       const refreshToken = JWT.sign({ id: response.id }, config.authRefreshSecret)
 
-      return { isRegistered: true, token: { access: accessToken, refresh: refreshToken } }
+      return {
+        isRegistered: true,
+        token: { access: accessToken, refresh: refreshToken },
+        user: {
+          name: user.name,
+          email: user.email,
+        }
+      }
     } catch (error: any) {
       if (error.statusCode === 404) {
         const payload = {
@@ -37,21 +44,26 @@ export default defineEventHandler<AuthResponse>(async (event) => {
           image: user.picture,
           email: user.email,
         }
-        console.log({ payload });
+        console.log({ user: payload });
         await useStorage().setItem(`user:${payload.id}`, payload)
         const authToken = JWT.sign({ id: payload.id }, config.authSecret)
 
-        return { isRegistered: false, token: { auth: authToken } }
-      }
-
-      throw error
+        return {
+          isRegistered: false,
+          token: { auth: authToken },
+          user: {
+            name: user.name,
+            email: user.email,
+          }
+        }
+      } else
+        throw error
     }
   } catch (error: any) {
-    console.error("Auth oauth/google GET", error)
+    console.error("Auth oauth/google POST", error)
 
-    if (error.statusCode === 404) {
+    if (error.statusCode === 404)
       throw error
-    }
 
     throw createError({ statusCode: 500, statusMessage: 'Some Unknown Error Found' })
   }
