@@ -25,6 +25,8 @@ export function createSignature(payload: any, secret: string) {
     .update(JSON.stringify(payload))
     .digest("hex");
 
+  console.log("\npayload", payload, "secret", secret, "digest", digest);
+
   return digest
 }
 

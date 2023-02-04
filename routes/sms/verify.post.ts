@@ -38,14 +38,13 @@ export default defineProtectedEventHandler<AuthResponse>(async (event, user) => 
 
     return { isRegistered: true, token: { access: accessToken, refresh: refreshToken }, user: { phone: user.phone } }
   } catch (error: any) {
-    console.error("Auth sms/verify POST", error)
-
     if (error.statusCode === 401) {
       throw error
     } else if (error.statusCode === 404) {
       const authToken = JWT.sign({ id: user.id }, config.authSecret)
       return { isRegistered: false, token: { auth: authToken }, user: { phone: user.phone } }
     }
+    console.error("Auth sms/verify POST", error)
 
     throw createError({ statusCode: 500, statusMessage: "Some Unknown Error Found" })
   }

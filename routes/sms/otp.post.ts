@@ -14,9 +14,8 @@ export default defineEventHandler<Omit<AuthResponse, 'user'>>(async (event) => {
 
   const phoneStatus: PhoneStatus | null = await useStorage().getItem(`phone:${phone}`)
 
-  if (phoneStatus && new Date(phoneStatus.expiresIn).getTime() > new Date().getTime()) {
+  if (phoneStatus && new Date(phoneStatus.expiresIn).getTime() > new Date().getTime())
     createError({ statusCode: 400, statusMessage: "OTP not expired" })
-  }
 
   try {
     const authHeader = event.node.req.headers['authorization']
