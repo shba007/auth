@@ -12,11 +12,11 @@
   "dependencies": {
     "cors": "^2.8.5",
     "jsonwebtoken": "^9.0.0",
-    "nitropack": "^2.1.1",
+    "nitropack": "^2.2.1",
     "ofetch": "^1.0.0"
   },
   "devDependencies": {
     "@types/jsonwebtoken": "^9.0.1",
-    "@types/node": "^18.11.18"
+    "@types/node": "^18.13.0"
   }
 }
