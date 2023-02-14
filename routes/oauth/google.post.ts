@@ -4,7 +4,6 @@ import { AuthResponse } from "../../utils/models"
 
 export default defineEventHandler<AuthResponse>(async (event) => {
   const config = useRuntimeConfig()
-
   // if authToken uuid exist on the memory db
   // else throw error
 
@@ -15,45 +14,42 @@ export default defineEventHandler<AuthResponse>(async (event) => {
   // else create authToken
   try {
     const { code } = await readBody<{ code: string }>(event)
-    const user = await getGoogleUser({ code, client_id: config.oauthGoogleId, client_secret: config.oauthGoogleSecret, redirect_uri: config.oauthGoogleRedirect })
+    const OAuthUser = await getGoogleUser({ code, client_id: config.oauthGoogleId, client_secret: config.oauthGoogleSecret, redirect_uri: config.oauthGoogleRedirect })
 
     try {
-      const payload = { email: user.email }
-      const response = await ofetch('/user/webhook', {
+      const payload = { email: OAuthUser.email }
+      const user = await ofetch('/user/webhook', {
         baseURL: config.apiURL, method: 'GET',
         headers: { 'Signature': `${createSignature(payload, config.authWebhook)}` },
         query: payload
       })
 
-      const accessToken = JWT.sign({ id: response.id }, config.authAccessSecret)
-      const refreshToken = JWT.sign({ id: response.id }, config.authRefreshSecret)
+      const accessToken = JWT.sign({ id: user.id }, config.authAccessSecret)
+      const refreshToken = JWT.sign({ id: user.id }, config.authRefreshSecret)
 
       return {
         isRegistered: true,
         token: { access: accessToken, refresh: refreshToken },
-        user: {
-          name: user.name,
-          email: user.email,
-        }
+        user: user
       }
     } catch (error: any) {
       if (error.statusCode === 404) {
-        const payload = {
-          id: user.id,
-          name: user.name,
-          image: user.picture,
-          email: user.email,
+        const user = {
+          id: OAuthUser.id,
+          name: OAuthUser.name,
+          image: OAuthUser.picture,
+          email: OAuthUser.email,
         }
-        console.log({ user: payload });
-        await useStorage().setItem(`user:${payload.id}`, payload)
-        const authToken = JWT.sign({ id: payload.id }, config.authSecret)
+
+        await useStorage().setItem(`user:${user.id}`, user)
+        const authToken = JWT.sign({ id: user.id }, config.authSecret)
 
         return {
           isRegistered: false,
           token: { auth: authToken },
           user: {
             name: user.name,
-            email: user.email,
+            email: user.email
           }
         }
       } else

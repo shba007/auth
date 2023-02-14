@@ -10,7 +10,7 @@ export default defineEventHandler<Omit<AuthResponse, 'user'>>(async (event) => {
   // create otp and store to db
   // send the otp to sms api and authToken to user
   const config = useRuntimeConfig()
-  const { phone } = await readBody<{ phone: string }>(event)
+  const { action, phone } = await readBody<{ action: 'login' | 'register', phone: string }>(event)
 
   const phoneStatus: PhoneStatus | null = await useStorage().getItem(`phone:${phone}`)
 
@@ -35,8 +35,29 @@ export default defineEventHandler<Omit<AuthResponse, 'user'>>(async (event) => {
 
     await useStorage().setItem(`user:${user.id}`, user)
 
+    let userFound = true
+    if (action === 'register') {
+      try {
+        // Check if user phone number already exists
+        const payload = { phone: phone }
+        const response = await ofetch('/user/webhook', {
+          baseURL: config.apiURL, method: 'GET',
+          headers: { 'Signature': `${createSignature(payload, config.authWebhook)}` },
+          query: payload
+        })
+
+        userFound = true
+      } catch (error) {
+        userFound = false
+      }
+    }
+
+    if (action === 'register' && userFound) {
+      const authToken = JWT.sign({ id: user.id }, config.authSecret)
+      return { isRegistered: true, token: { auth: authToken } }
+    }
     const otp = generateOTP()
-    // await sendOTP(otp, parseInt(phone))
+    await sendOTP(otp, parseInt(phone))
 
     const newPhoneStatus = {
       otp,

@@ -41,6 +41,8 @@ export default defineProtectedEventHandler<Omit<AuthResponse, 'user'>>(async (ev
   } catch (error: any) {
     if (error.statusCode === 400)
       throw error
+    else if (error.statusCode === 409)
+      throw createError({ statusCode: 409, statusMessage: "Phone or Email already exists" })
 
     console.error("Auth register POST", error)
     throw createError({ statusCode: 500, statusMessage: "Some Unknown Error Found" })
