@@ -10,7 +10,6 @@
     "clean": "rm -r .nitro .output"
   },
   "dependencies": {
-    "cors": "^2.8.5",
     "jsonwebtoken": "^9.0.0",
     "nitropack": "^2.2.1",
     "ofetch": "^1.0.0"
