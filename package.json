@@ -11,11 +11,11 @@
   },
   "dependencies": {
     "jsonwebtoken": "^9.0.0",
-    "nitropack": "^2.2.2",
+    "nitropack": "^2.3.1",
     "ofetch": "^1.0.1"
   },
   "devDependencies": {
     "@types/jsonwebtoken": "^9.0.1",
-    "@types/node": "^18.14.0"
+    "@types/node": "^18.15.3"
   }
 }
