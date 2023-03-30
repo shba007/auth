@@ -1,5 +1,3 @@
-import { getGoogleOAuthURL } from "../../utils/helpers"
-
 export default defineEventHandler<string>(async (event) => {
   try {
     const config = useRuntimeConfig()

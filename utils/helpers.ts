@@ -58,30 +58,26 @@ export async function getGoogleUser({ code, client_id, client_secret, redirect_u
   };
 
   const qs = new URLSearchParams(values);
-  let access_token, id_token;
+  let response, access_token, id_token;
 
   try {
-    const response = await ofetch<GoogleTokensResult>("https://oauth2.googleapis.com/token", {
+    response = await ofetch<GoogleTokensResult>("https://oauth2.googleapis.com/token", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: qs.toString(),
     });
+
     access_token = response.access_token
     id_token = response.id_token
 
-  } catch (error) {
-    console.error("Error fetching Google Token", error);
-  }
-
-  try {
-    const response = await ofetch<GoogleUserResult>(`https://www.googleapis.com/oauth2/v2/userinfo?alt=json&access_token=${access_token}`, {
+    response = await ofetch<GoogleUserResult>(`https://www.googleapis.com/oauth2/v2/userinfo?alt=json&access_token=${access_token}`, {
       method: "GET",
       headers: { "Authorization": `Bearer ${id_token}` },
     });
 
     return response;
   } catch (error) {
-    console.error("Error fetching Google Token", error);
+    throw error
   }
 }
 
@@ -91,11 +87,16 @@ export function getExpiryTimeFromNow({ days = 0, hour = 0, minute = 0, second = 
   return new Date(new Date().getTime() + millisecond).toISOString().slice(0, -5) + "Z"
 }
 
-export function isTokenExpired(token: string) {
-  const decodedToken = JWT.decode(token)
+enum TokenType {
+  'auth' = '3m',
+  'refresh' = '',
+  'access' = '3m'
+}
 
-  if (typeof decodedToken === 'string' || decodedToken == undefined || decodedToken?.exp == undefined)
-    return false
-
-  return Date.now() >= decodedToken.exp * 1000
+export function createJWTToken(type: 'auth' | 'refresh' | 'access', id: string, secret: string) {
+  const expiresIn = TokenType[type]
+  if (expiresIn.length)
+    return JWT.sign({ id }, secret, { expiresIn })
+  else
+    return JWT.sign({ id }, secret)
 }

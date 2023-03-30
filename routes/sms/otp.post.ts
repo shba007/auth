@@ -1,21 +1,22 @@
 import JWT from "jsonwebtoken";
 import crypto from "node:crypto";
-import { getExpiryTimeFromNow } from '../../utils/helpers';
-import { generateOTP, sendOTP } from "../../utils/sms";
+
 import { AuthResponse, PhoneStatus } from "../../utils/models";
 
+// update user or create user
+// create uuid, authToken
+// create otp and store to db
+// send the otp to sms api and authToken to user
 export default defineEventHandler<Omit<AuthResponse, 'user'>>(async (event) => {
-  // update user or create user
-  // create uuid, authToken
-  // create otp and store to db
-  // send the otp to sms api and authToken to user
   const config = useRuntimeConfig()
   const { action, phone } = await readBody<{ action: 'login' | 'register', phone: string }>(event)
 
-  const phoneStatus: PhoneStatus | null = await useStorage().getItem(`phone:${phone}`)
-
-  if (phoneStatus && new Date(phoneStatus.expiresIn).getTime() > new Date().getTime())
-    createError({ statusCode: 400, statusMessage: "OTP not expired" })
+  let phoneStatus = await useStorage().getItem(`phone:${phone}`) as PhoneStatus | null
+  // Handle all Errors
+  if (phoneStatus && new Date(phoneStatus.retryTimeout).getTime() > new Date().getTime()) {
+    // TODO: Send a security alert
+    throw createError({ statusCode: 400, statusMessage: "Retry not expired" })
+  }
 
   try {
     const authHeader = event.node.req.headers['authorization']
@@ -24,7 +25,10 @@ export default defineEventHandler<Omit<AuthResponse, 'user'>>(async (event) => {
 
     if (!!token) {
       const payload = JWT.verify(token, config.authSecret) as { id: string }
-      user = await useStorage().getItem(`user:${payload.id}`)
+      user = await useStorage().getItem(`user:${payload.id}`) as {
+        id: string;
+        phone: string;
+      }
       user.phone = phone
     } else {
       user = {
@@ -53,22 +57,26 @@ export default defineEventHandler<Omit<AuthResponse, 'user'>>(async (event) => {
     }
 
     if (action === 'register' && userFound) {
-      const authToken = JWT.sign({ id: user.id }, config.authSecret)
+      const authToken = createJWTToken('auth', user.id, config.authSecret)
       return { isRegistered: true, token: { auth: authToken } }
     }
     const otp = generateOTP()
-    await sendOTP(otp, parseInt(phone))
+    // FIXME: Uncomment
+    // await sendOTP(otp, parseInt(phone))
 
-    const newPhoneStatus = {
+    const retryCount = phoneStatus == null ? 0 : ++phoneStatus.retryCount
+    phoneStatus = {
       otp,
-      expiresIn: getExpiryTimeFromNow({ minute: 3 }),
-      retriesCount: phoneStatus !== null ? phoneStatus.retriesCount++ : 0
+      otpTimeout: getExpiryTimeFromNow({ minute: 3 }),
+      retryCount,
+      retryTimeout: getExpiryTimeFromNow(retryCount >= 3 ? { hour: 3 } : { minute: 1, second: 25 }),
+      verified: false
     }
 
-    console.log({ user, newPhoneStatus });
-    await useStorage().setItem(`phone:${phone}`, newPhoneStatus)
+    console.log({ user, phone: phoneStatus });
+    await useStorage().setItem(`phone:${user.phone}`, phoneStatus)
 
-    const authToken = JWT.sign({ id: user.id }, config.authSecret)
+    const authToken = createJWTToken('auth', user.id, config.authSecret)
 
     return { isRegistered: false, token: { auth: authToken } }
   } catch (error: any) {

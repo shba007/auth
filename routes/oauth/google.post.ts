@@ -1,5 +1,3 @@
-import JWT from "jsonwebtoken"
-import { createSignature, getGoogleUser } from "../../utils/helpers"
 import { AuthResponse } from "../../utils/models"
 
 export default defineEventHandler<AuthResponse>(async (event) => {
@@ -24,8 +22,8 @@ export default defineEventHandler<AuthResponse>(async (event) => {
         query: payload
       })
 
-      const accessToken = JWT.sign({ id: user.id }, config.authAccessSecret)
-      const refreshToken = JWT.sign({ id: user.id }, config.authRefreshSecret)
+      const accessToken = createJWTToken('access', user.id, config.authAccessSecret)
+      const refreshToken = createJWTToken('refresh', user.id, config.authRefreshSecret)
 
       return {
         isRegistered: true,
@@ -42,7 +40,7 @@ export default defineEventHandler<AuthResponse>(async (event) => {
         }
 
         await useStorage().setItem(`user:${user.id}`, user)
-        const authToken = JWT.sign({ id: user.id }, config.authSecret)
+        const authToken = createJWTToken('auth', user.id, config.authSecret)
 
         return {
           isRegistered: false,

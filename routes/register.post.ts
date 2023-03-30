@@ -1,13 +1,12 @@
-import JWT from "jsonwebtoken";
-import { createSignature } from '../utils/helpers';
-import { AuthResponse } from "../utils/models";
-import { defineProtectedEventHandler } from '../utils/wrapper';
+import { AuthResponse, PhoneStatus } from "../utils/models";
 
 export default defineProtectedEventHandler<Omit<AuthResponse, 'user'>>(async (event, user) => {
   const config = useRuntimeConfig()
 
   try {
-    if (!user)
+    const phoneStatus = await useStorage().getItem(`phone:${user.phone}`) as PhoneStatus | null
+
+    if (!(user && phoneStatus && phoneStatus.verified))
       throw createError({ statusCode: 400, statusMessage: "OAuth or SMS Login first" })
 
     const body = await readBody<{
@@ -34,8 +33,13 @@ export default defineProtectedEventHandler<Omit<AuthResponse, 'user'>>(async (ev
       body: payload
     })
 
-    const accessToken = JWT.sign({ id: response.id }, config.authAccessSecret)
-    const refreshToken = JWT.sign({ id: response.id }, config.authRefreshSecret)
+    // Reset retryCount
+    phoneStatus.retryCount = 0;
+    phoneStatus.verified = true;
+    await useStorage().setItem(`phone:${user.phone}`, phoneStatus);
+
+    const accessToken = createJWTToken('access', response.id, config.authAccessSecret)
+    const refreshToken = createJWTToken('refresh', response.id, config.authRefreshSecret)
 
     return { isRegistered: true, token: { access: accessToken, refresh: refreshToken } }
   } catch (error: any) {

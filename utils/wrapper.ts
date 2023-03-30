@@ -1,6 +1,12 @@
 import JWT from "jsonwebtoken";
 import { UserInfo } from "./models";
 
+interface JWTToken {
+  id: string,
+  ita: number,
+  exp: number
+}
+
 export function defineProtectedEventHandler<T>(
   handler: (event: CompatibilityEvent, user: UserInfo) => T | Promise<T>
 ) {
@@ -9,8 +15,9 @@ export function defineProtectedEventHandler<T>(
       const config = useRuntimeConfig()
       const authHeader = event.node.req.headers['authorization']
       const token = authHeader && authHeader.split(" ")[1]
+
       if (token == null)
-        throw createError({ statusCode: 401, statusMessage: "Token Not found" })
+        throw createError({ statusCode: 404, statusMessage: "Token Not found" })
 
       try {
         const { id: userId } = JWT.verify(token, config.authSecret) as { id: string }
@@ -18,7 +25,10 @@ export function defineProtectedEventHandler<T>(
 
         return handler(event, user)
       } catch (error) {
-        throw createError({ statusCode: 403, statusMessage: "Invalid Token" })
+        if (error instanceof JWT.TokenExpiredError)
+          throw createError({ statusCode: 401, statusMessage: "Token Expired" })
+        else
+          throw createError({ statusCode: 498, statusMessage: "Invalid Token" })
       }
     } catch (error: any) {
       sendError(event, error)

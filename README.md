@@ -1,8 +1,4 @@
 # TODO
-* Prevent Brute forcing
-	* Captcha
-	* Reties count
-	* Rate Limiting
-* OTP Expiration
-* Add exp to tokens
+* Rate Limiting
+* Captcha
 * Maintain blocklist

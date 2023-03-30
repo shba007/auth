@@ -1,9 +1,6 @@
-import { defineProtectedEventHandler } from "../utils/wrapper";
-
 export default defineProtectedEventHandler<{ statusCode: number, statusMessage: string }>(async (event, user) => {
   try {
-    return { statusCode: 201, statusMessage: "" }
-
+    return { statusCode: 202, statusMessage: "Logout Successfully" }
   } catch (error: any) {
     console.error("Auth logout DELETE", error)
 

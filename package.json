@@ -1,7 +1,7 @@
 {
   "private": true,
   "engines": {
-    "node": ">=18 <19"
+    "node": "^18.15.0"
   },
   "scripts": {
     "dev": "nitropack dev",
@@ -10,13 +10,11 @@
     "clean": "rm -r .nitro .output"
   },
   "dependencies": {
-    "cors": "^2.8.5",
     "jsonwebtoken": "^9.0.0",
-    "nitropack": "^2.2.1",
-    "ofetch": "^1.0.0"
+    "nitropack": "^2.3.2",
+    "ofetch": "^1.0.1"
   },
   "devDependencies": {
-    "@types/jsonwebtoken": "^9.0.1",
-    "@types/node": "^18.13.0"
+    "@types/jsonwebtoken": "^9.0.1"
   }
 }
