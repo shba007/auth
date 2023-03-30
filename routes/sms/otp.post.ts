@@ -11,7 +11,7 @@ export default defineEventHandler<Omit<AuthResponse, 'user'>>(async (event) => {
   const config = useRuntimeConfig()
   const { action, phone } = await readBody<{ action: 'login' | 'register', phone: string }>(event)
 
-  let phoneStatus: PhoneStatus | null = await useStorage().getItem(`phone:${phone}`)
+  let phoneStatus = await useStorage().getItem(`phone:${phone}`) as PhoneStatus | null
   // Handle all Errors
   if (phoneStatus && new Date(phoneStatus.retryTimeout).getTime() > new Date().getTime()) {
     // TODO: Send a security alert
@@ -25,7 +25,10 @@ export default defineEventHandler<Omit<AuthResponse, 'user'>>(async (event) => {
 
     if (!!token) {
       const payload = JWT.verify(token, config.authSecret) as { id: string }
-      user = await useStorage().getItem(`user:${payload.id}`)
+      user = await useStorage().getItem(`user:${payload.id}`) as {
+        id: string;
+        phone: string;
+      }
       user.phone = phone
     } else {
       user = {

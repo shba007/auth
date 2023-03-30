@@ -1,10 +1,10 @@
-import { AuthResponse } from "../utils/models";
+import { AuthResponse, PhoneStatus } from "../utils/models";
 
 export default defineProtectedEventHandler<Omit<AuthResponse, 'user'>>(async (event, user) => {
   const config = useRuntimeConfig()
 
   try {
-    const phoneStatus  = await useStorage().getItem(`phone:${user.phone}`)
+    const phoneStatus = await useStorage().getItem(`phone:${user.phone}`) as PhoneStatus | null
 
     if (!(user && phoneStatus && phoneStatus.verified))
       throw createError({ statusCode: 400, statusMessage: "OAuth or SMS Login first" })
@@ -33,10 +33,10 @@ export default defineProtectedEventHandler<Omit<AuthResponse, 'user'>>(async (ev
       body: payload
     })
 
-     // Reset retryCount
-     phoneStatus.retryCount = 0;
-     phoneStatus.verified = true;
-     await useStorage().setItem(`phone:${user.phone}`, phoneStatus);
+    // Reset retryCount
+    phoneStatus.retryCount = 0;
+    phoneStatus.verified = true;
+    await useStorage().setItem(`phone:${user.phone}`, phoneStatus);
 
     const accessToken = createJWTToken('access', response.id, config.authAccessSecret)
     const refreshToken = createJWTToken('refresh', response.id, config.authRefreshSecret)
