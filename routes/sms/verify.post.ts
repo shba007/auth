@@ -1,20 +1,12 @@
 import { AuthResponse, PhoneStatus } from "../../utils/models";
 
-// if authToken uuid exist on the memory db
-// else throw error
-
-// if the otp matches
-// else send wrong otp
-
-// if phone number exist on the db send accessToken refreshToken
-// else create authToken
 export default defineProtectedEventHandler<AuthResponse>(async (event, user) => {
   const config = useRuntimeConfig();
   if (!(user && user.phone))
     throw createError({ statusCode: 400, statusMessage: "Send OTP First" });
 
   const { otp } = await readBody<{ otp: number }>(event);
-  const phoneStatus = await useStorage().getItem(`phone:${user.phone}`) as PhoneStatus | null;
+  const phoneStatus: PhoneStatus = await useStorage().getItem(`phone:${user.phone}`);
   console.log({ user, phoneStatus });
 
   try {
@@ -31,6 +23,9 @@ export default defineProtectedEventHandler<AuthResponse>(async (event, user) => 
       headers: { Signature: `${createSignature(payload, config.authWebhook)}` },
       query: payload,
     });
+
+    user.id = response.id
+    console.log("response", response);
 
     // Reset retryCount
     phoneStatus.retryCount = 0;
@@ -64,9 +59,6 @@ export default defineProtectedEventHandler<AuthResponse>(async (event, user) => 
       };
     }
 
-    throw createError({
-      statusCode: 500,
-      statusMessage: "Some Unknown Error Found",
-    });
+    throw createError({ statusCode: 500, cstatusMessage: "Some Unknown Error Found" });
   }
 });

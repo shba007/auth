@@ -3,10 +3,6 @@ import crypto from "node:crypto";
 
 import { AuthResponse, PhoneStatus } from "../../utils/models";
 
-// update user or create user
-// create uuid, authToken
-// create otp and store to db
-// send the otp to sms api and authToken to user
 export default defineEventHandler<Omit<AuthResponse, 'user'>>(async (event) => {
   const config = useRuntimeConfig()
   const { action, phone } = await readBody<{ action: 'login' | 'register', phone: string }>(event)
@@ -60,9 +56,15 @@ export default defineEventHandler<Omit<AuthResponse, 'user'>>(async (event) => {
       const authToken = createJWTToken('auth', user.id, config.authSecret)
       return { isRegistered: true, token: { auth: authToken } }
     }
-    const otp = generateOTP()
-    // FIXME: Uncomment
-    // await sendOTP(otp, parseInt(phone))
+
+    let otp: number | undefined;
+    /* For Test Credentials */
+    if (phone === config.testPhone) {
+      otp = parseInt(config.testOTP)
+    } else {
+      otp = generateOTP()
+      await sendOTP(otp, parseInt(phone))
+    }
 
     const retryCount = phoneStatus == null ? 0 : ++phoneStatus.retryCount
     phoneStatus = {

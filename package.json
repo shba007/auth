@@ -1,20 +1,23 @@
 {
+  "name": "auth-service",
+  "version": "0.1.0",
   "private": true,
   "engines": {
-    "node": "^18.15.0"
+    "node": "^18.16.0"
   },
   "scripts": {
     "dev": "nitropack dev",
     "build": "nitropack build",
     "preview": "node .output/server/index.mjs",
-    "clean": "rm -r .nitro .output"
+    "clean": "rm -r .nitro .output",
+    "start": "node .output/server/index.mjs"
+  },
+  "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.2"
   },
   "dependencies": {
     "jsonwebtoken": "^9.0.0",
-    "nitropack": "^2.3.2",
+    "nitropack": "^2.4.0",
     "ofetch": "^1.0.1"
-  },
-  "devDependencies": {
-    "@types/jsonwebtoken": "^9.0.1"
   }
 }

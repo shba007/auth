@@ -22,6 +22,8 @@ export default defineNitroConfig({
     oauthGoogleId: process.env.OAUTH_GOOGLE_ID,
     oauthGoogleSecret: process.env.OAUTH_GOOGLE_SECRET,
     oauthGoogleRedirect: process.env.OAUTH_GOOGLE_REDIRECT,
-    smsSecret: process.env.SMS_SECRET
+    smsSecret: process.env.SMS_SECRET,
+    testPhone: process.env.TEST_PHONE,
+    testOTP: process.env.TEST_OTP
   },
 })
