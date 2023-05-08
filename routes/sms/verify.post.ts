@@ -1,13 +1,5 @@
 import { AuthResponse, PhoneStatus } from "../../utils/models";
 
-// if authToken uuid exist on the memory db
-// else throw error
-
-// if the otp matches
-// else send wrong otp
-
-// if phone number exist on the db send accessToken refreshToken
-// else create authToken
 export default defineProtectedEventHandler<AuthResponse>(async (event, user) => {
   const config = useRuntimeConfig();
   if (!(user && user.phone))
@@ -32,13 +24,16 @@ export default defineProtectedEventHandler<AuthResponse>(async (event, user) => 
       query: payload,
     });
 
+    user.id = response.id
+    console.log("response", response);
+
     // Reset retryCount
     phoneStatus.retryCount = 0;
     phoneStatus.verified = true;
     await useStorage().setItem(`phone:${user.phone}`, phoneStatus);
 
-    const accessToken = createJWTToken("access",user.id,config.authAccessSecret);
-    const refreshToken = createJWTToken("refresh",user.id,config.authRefreshSecret);
+    const accessToken = createJWTToken("access", user.id, config.authAccessSecret);
+    const refreshToken = createJWTToken("refresh", user.id, config.authRefreshSecret);
 
     return {
       isRegistered: true,
@@ -64,9 +59,6 @@ export default defineProtectedEventHandler<AuthResponse>(async (event, user) => 
       };
     }
 
-    throw createError({
-      statusCode: 500,
-      statusMessage: "Some Unknown Error Found",
-    });
+    throw createError({ statusCode: 500, cstatusMessage: "Some Unknown Error Found" });
   }
 });
