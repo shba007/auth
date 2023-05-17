@@ -7,12 +7,12 @@ interface JWTToken {
   exp: number
 }
 
-export function defineProtectedEventHandler<T>(
-  handler: (event: CompatibilityEvent, user: UserInfo) => T | Promise<T>
-) {
+export function defineProtectedEventHandler<T>(handler: (event: CompatibilityEvent, user: UserInfo) => T | Promise<T>) {
   return defineEventHandler<T>(async (event) => {
     try {
       const config = useRuntimeConfig()
+      const storage = useStorage()
+
       const authHeader = event.node.req.headers['authorization']
       const token = authHeader && authHeader.split(" ")[1]
 
@@ -21,7 +21,7 @@ export function defineProtectedEventHandler<T>(
 
       try {
         const { id: userId } = JWT.verify(token, config.authSecret) as { id: string }
-        const user = await useStorage().getItem(`user:${userId}`)
+        const user = await storage.getItem(`user:${userId}`)
 
         return handler(event, user)
       } catch (error) {

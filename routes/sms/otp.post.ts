@@ -5,14 +5,18 @@ import { AuthResponse, PhoneStatus } from "../../utils/models";
 
 export default defineEventHandler<Omit<AuthResponse, 'user'>>(async (event) => {
   const config = useRuntimeConfig()
+  const storage = useStorage()
   const { action, phone } = await readBody<{ action: 'login' | 'register', phone: string }>(event)
 
-  let phoneStatus = await useStorage().getItem(`phone:${phone}`) as PhoneStatus | null
+  let phoneStatus = await storage.getItem(`phone:${phone}`) as PhoneStatus
   // Handle all Errors
   if (phoneStatus && new Date(phoneStatus.retryTimeout).getTime() > new Date().getTime()) {
     // TODO: Send a security alert
     throw createError({ statusCode: 400, statusMessage: "Retry not expired" })
   }
+
+  console.log("hi");
+
 
   try {
     const authHeader = event.node.req.headers['authorization']
@@ -21,7 +25,7 @@ export default defineEventHandler<Omit<AuthResponse, 'user'>>(async (event) => {
 
     if (!!token) {
       const payload = JWT.verify(token, config.authSecret) as { id: string }
-      user = await useStorage().getItem(`user:${payload.id}`) as {
+      user = await storage.getItem(`user:${payload.id}`) as {
         id: string;
         phone: string;
       }
@@ -33,9 +37,9 @@ export default defineEventHandler<Omit<AuthResponse, 'user'>>(async (event) => {
       }
     }
 
-    await useStorage().setItem(`user:${user.id}`, user)
+    await storage.setItem(`user:${user.id}`, user)
 
-    let userFound = true
+    let isUserFound = true
     if (action === 'register') {
       try {
         // Check if user phone number already exists
@@ -46,13 +50,13 @@ export default defineEventHandler<Omit<AuthResponse, 'user'>>(async (event) => {
           query: payload
         })
 
-        userFound = true
+        isUserFound = true
       } catch (error) {
-        userFound = false
+        isUserFound = false
       }
     }
 
-    if (action === 'register' && userFound) {
+    if (action === 'register' && isUserFound) {
       const authToken = createJWTToken('auth', user.id, config.authSecret)
       return { isRegistered: true, token: { auth: authToken } }
     }
@@ -63,7 +67,8 @@ export default defineEventHandler<Omit<AuthResponse, 'user'>>(async (event) => {
       otp = parseInt(config.testOTP)
     } else {
       otp = generateOTP()
-      await sendOTP(otp, parseInt(phone))
+      // FIXME: Uncomment
+      // await sendOTP(otp, parseInt(phone))
     }
 
     const retryCount = phoneStatus == null ? 0 : ++phoneStatus.retryCount
@@ -76,7 +81,7 @@ export default defineEventHandler<Omit<AuthResponse, 'user'>>(async (event) => {
     }
 
     console.log({ user, phone: phoneStatus });
-    await useStorage().setItem(`phone:${user.phone}`, phoneStatus)
+    await storage.setItem(`phone:${user.phone}`, phoneStatus)
 
     const authToken = createJWTToken('auth', user.id, config.authSecret)
 

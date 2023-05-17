@@ -2,6 +2,7 @@ import { AuthResponse } from "../../utils/models"
 
 export default defineEventHandler<AuthResponse>(async (event) => {
   const config = useRuntimeConfig()
+  const storage = useStorage()
   // if authToken uuid exist on the memory db
   // else throw error
 
@@ -39,7 +40,7 @@ export default defineEventHandler<AuthResponse>(async (event) => {
           email: OAuthUser.email,
         }
 
-        await useStorage().setItem(`user:${user.id}`, user)
+        await storage.setItem(`user:${user.id}`, user)
         const authToken = createJWTToken('auth', user.id, config.authSecret)
 
         return {
