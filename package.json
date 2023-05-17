@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "jsonwebtoken": "^9.0.0",
-    "nitropack": "^2.4.0",
+    "nitropack": "^2.4.1",
     "ofetch": "^1.0.1"
   }
 }

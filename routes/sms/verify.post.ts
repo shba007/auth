@@ -1,12 +1,13 @@
 import { AuthResponse, PhoneStatus } from "../../utils/models";
 
 export default defineProtectedEventHandler<AuthResponse>(async (event, user) => {
-  const config = useRuntimeConfig();
+  const config = useRuntimeConfig()
+  const storage = useStorage()
   if (!(user && user.phone))
     throw createError({ statusCode: 400, statusMessage: "Send OTP First" });
 
   const { otp } = await readBody<{ otp: number }>(event);
-  const phoneStatus: PhoneStatus = await useStorage().getItem(`phone:${user.phone}`);
+  const phoneStatus = await storage.getItem(`phone:${user.phone}`) as PhoneStatus;
   console.log({ user, phoneStatus });
 
   try {
@@ -30,7 +31,7 @@ export default defineProtectedEventHandler<AuthResponse>(async (event, user) => 
     // Reset retryCount
     phoneStatus.retryCount = 0;
     phoneStatus.verified = true;
-    await useStorage().setItem(`phone:${user.phone}`, phoneStatus);
+    await storage.setItem(`phone:${user.phone}`, phoneStatus);
 
     const accessToken = createJWTToken("access", user.id, config.authAccessSecret);
     const refreshToken = createJWTToken("refresh", user.id, config.authRefreshSecret);
@@ -49,7 +50,7 @@ export default defineProtectedEventHandler<AuthResponse>(async (event, user) => 
       // Reset retryCount
       phoneStatus.retryCount = 0;
       phoneStatus.verified = true;
-      await useStorage().setItem(`phone:${user.phone}`, phoneStatus);
+      await storage.setItem(`phone:${user.phone}`, phoneStatus);
 
       const authToken = createJWTToken("auth", user.id, config.authSecret);
       return {
@@ -59,6 +60,6 @@ export default defineProtectedEventHandler<AuthResponse>(async (event, user) => 
       };
     }
 
-    throw createError({ statusCode: 500, cstatusMessage: "Some Unknown Error Found" });
+    throw createError({ statusCode: 500, statusMessage: "Some Unknown Error Found" });
   }
 });
