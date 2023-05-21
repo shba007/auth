@@ -1,4 +1,4 @@
-export interface PhoneStatus {
+interface PhoneStatus {
   otp: number;
   otpTimeout: string;
   retryCount: number;
@@ -6,7 +6,7 @@ export interface PhoneStatus {
   verified: boolean;
 }
 
-export interface UserInfo {
+interface UserInfo {
   id: string;
   name: string | null;
   image: string | null;
@@ -14,22 +14,22 @@ export interface UserInfo {
   phone: string;
 }
 
-export interface AuthResponse {
+interface AuthResponse {
   isRegistered: boolean;
   token:
-    | {
-        auth: string;
-      }
-    | {
-        access: string;
-        refresh: string;
-      };
+  | {
+    auth: string;
+  }
+  | {
+    access: string;
+    refresh: string;
+  };
   user:
-    | {
-        name: string;
-        email: string;
-      }
-    | {
-        phone: string;
-      };
+  | {
+    name: string;
+    email: string;
+  }
+  | {
+    phone: string;
+  };
 }

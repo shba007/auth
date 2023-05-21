@@ -1,5 +1,3 @@
-import { AuthResponse, PhoneStatus } from "../utils/models";
-
 export default defineProtectedEventHandler<Omit<AuthResponse, 'user'>>(async (event, user) => {
   const config = useRuntimeConfig()
   const storage = useStorage()

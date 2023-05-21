@@ -1,5 +1,3 @@
-import { AuthResponse } from "../../utils/models"
-
 export default defineEventHandler<AuthResponse>(async (event) => {
   const config = useRuntimeConfig()
   const storage = useStorage()
