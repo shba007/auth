@@ -9,15 +9,19 @@
     "dev": "nitropack dev",
     "build": "nitropack build",
     "preview": "node .output/server/index.mjs",
+    "postinstall": "prisma generate",
     "clean": "rm -r .nitro .output",
     "start": "node .output/server/index.mjs"
   },
   "devDependencies": {
-    "@types/jsonwebtoken": "^9.0.2"
+    "@types/jsonwebtoken": "^9.0.2",
+    "prisma": "^4.14.1"
   },
   "dependencies": {
+    "@prisma/client": "^4.14.1",
     "jsonwebtoken": "^9.0.0",
     "nitropack": "^2.4.1",
-    "ofetch": "^1.0.1"
+    "ofetch": "^1.0.1",
+    "uuid": "^9.0.0"
   }
 }

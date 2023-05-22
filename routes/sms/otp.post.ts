@@ -1,8 +1,6 @@
 import JWT from "jsonwebtoken";
 import crypto from "node:crypto";
 
-import { AuthResponse, PhoneStatus } from "../../utils/models";
-
 export default defineEventHandler<Omit<AuthResponse, 'user'>>(async (event) => {
   const config = useRuntimeConfig()
   const storage = useStorage()
