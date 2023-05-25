@@ -1,9 +1,14 @@
 const config = useRuntimeConfig()
 
 export default defineEventHandler((event) => {
+  const origins: string[] = JSON.parse(config.corsURL)
+  const origin: string = event.node.req.headers.origin
+  const selectedOrigin = origins.findIndex((o) => o == origin)
+  // console.log({ origins, origin, selectedOrigin });
+
   setResponseHeaders(event, {
     "Access-Control-Allow-Methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
-    "Access-Control-Allow-Origin": config.corsURL,
+    "Access-Control-Allow-Origin": selectedOrigin !== -1 ? origins[selectedOrigin] : origins[0],
     "Access-Control-Allow-Credentials": "true",
     "Access-Control-Allow-Headers": "*",
     "Access-Control-Expose-Headers": "*"
