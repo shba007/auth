@@ -11,17 +11,19 @@ datasource db {
 }
 
 enum Gender {
-  MALE
-  FEMALE
-  OTHER
+  Male
+  Female
+  Other
 }
 
 model User {
-  id     String   @id @default(uuid())
-  name   String
-  image  String?
-  email  String?  @unique
-  phone  String   @unique
-  dob    DateTime
-  gender Gender
+  id           String   @id @default(uuid())
+  name         String
+  image        String?
+  email        String?  @unique
+  phone        String   @unique
+  dob          DateTime
+  gender       Gender
+  userId       String?  @unique @default(uuid())
+  influencerId String?  @unique @default(uuid())
 }

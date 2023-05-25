@@ -1,22 +1,21 @@
 export default defineEventHandler<AuthResponse>(async (event) => {
   const config = useRuntimeConfig()
   const storage = useStorage()
-  // if authToken uuid exist on the memory db
-  // else throw error
 
-  // if the otp matches
-  // else send wrong otp
-
-  // if exist on the db send accessToken refreshToken
-  // else create authToken
   try {
     const { code } = await readBody<{ code: string }>(event)
-    const OAuthUser = await getGoogleUser({ code, client_id: config.oauthGoogleId, client_secret: config.oauthGoogleSecret, redirect_uri: config.oauthGoogleRedirect })
+    const OAuthUser = await getGoogleUser({
+      code,
+      client_id: config.oauthGoogleId,
+      client_secret: config.oauthGoogleSecret,
+      redirect_uri: mapURL(config.oauthGoogleRedirect, config.apiURL, event)
+    })
 
     try {
       const payload = { email: OAuthUser.email }
       const user = await ofetch('/user/webhook', {
-        baseURL: config.apiURL, method: 'GET',
+        baseURL: mapURL(config.apiURL, config.apiURL, event),
+        method: 'GET',
         headers: { 'Signature': `${createSignature(payload, config.authWebhook)}` },
         query: payload
       })
