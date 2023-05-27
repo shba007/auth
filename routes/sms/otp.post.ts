@@ -13,9 +13,6 @@ export default defineEventHandler<Omit<AuthResponse, 'user'>>(async (event) => {
     throw createError({ statusCode: 400, statusMessage: "Retry not expired" })
   }
 
-  console.log("hi");
-
-
   try {
     const authHeader = event.node.req.headers['authorization']
     const token = authHeader && authHeader.split(" ")[1]
@@ -43,7 +40,8 @@ export default defineEventHandler<Omit<AuthResponse, 'user'>>(async (event) => {
         // Check if user phone number already exists
         const payload = { phone: phone }
         const response = await ofetch('/user/webhook', {
-          baseURL: config.apiURL, method: 'GET',
+          baseURL: mapURL(config.apiURL, config.apiURL, event),
+          method: 'GET',
           headers: { 'Signature': `${createSignature(payload, config.authWebhook)}` },
           query: payload
         })
@@ -65,7 +63,8 @@ export default defineEventHandler<Omit<AuthResponse, 'user'>>(async (event) => {
       otp = parseInt(config.testOTP)
     } else {
       otp = generateOTP()
-      await sendOTP(otp, parseInt(phone))
+      // FIXME: Uncomment
+      // await sendOTP(otp, parseInt(phone))
     }
 
     const retryCount = phoneStatus == null ? 0 : ++phoneStatus.retryCount

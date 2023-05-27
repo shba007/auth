@@ -100,3 +100,11 @@ export function createJWTToken(type: 'auth' | 'refresh' | 'access', id: string, 
   else
     return JWT.sign({ id }, secret)
 }
+
+export function mapURL(dict: any, urlMap: any, event: any) {
+  const origin = event.node.req.headers.origin;
+  urlMap = JSON.parse(urlMap)
+  const type = Object.keys(urlMap).find(key => urlMap[key] === `${origin}/api`);
+
+  return JSON.parse(dict)[type]
+}
