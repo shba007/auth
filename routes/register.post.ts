@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from "crypto";
 
 export default defineProtectedEventHandler<Omit<AuthResponse, 'user'>>(async (event, user) => {
   const config = useRuntimeConfig()
@@ -18,7 +18,7 @@ export default defineProtectedEventHandler<Omit<AuthResponse, 'user'>>(async (ev
       gender: string
     }>(event);
     const payload = {
-      id: uuidv4(),
+      id: randomUUID(),
       name: user.name ?? body.name,
       image: user.image ?? body.image,
       email: user.email ?? body.email,
