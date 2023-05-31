@@ -1,9 +1,7 @@
 const config = useRuntimeConfig()
 
 export default defineEventHandler((event) => {
-  console.log(config.corsUrl);
-  const origins: string[] = JSON.parse(JSON.stringify(config.corsUrl))
-  console.log(origins);
+  const origins: string[] = config.corsUrl
 
   const origin: string = event.node.req.headers.origin
   const selectedOrigin = origins.findIndex((o) => o == origin)

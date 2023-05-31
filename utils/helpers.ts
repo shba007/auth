@@ -103,7 +103,7 @@ export function createJWTToken(type: 'auth' | 'refresh' | 'access', id: string, 
 
 export function mapURL(dict: any, urlMap: any, event: any) {
   const origin = event.node.req.headers.origin;
-  urlMap = JSON.parse(JSON.stringify(urlMap))
+
   const type = Object.keys(urlMap).find(key => urlMap[key] === `${origin}/api`);
 
   return JSON.parse(JSON.stringify(dict))[type]
