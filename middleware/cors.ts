@@ -2,7 +2,7 @@ const config = useRuntimeConfig()
 
 export default defineEventHandler((event) => {
   console.log(config.corsUrl);
-  const origins: string[] = JSON.parse(`${config.corsUrl}`)
+  const origins: string[] = JSON.parse(JSON.stringify(config.corsUrl))
   console.log(origins);
 
   const origin: string = event.node.req.headers.origin
