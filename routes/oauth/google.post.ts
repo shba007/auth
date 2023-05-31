@@ -8,13 +8,13 @@ export default defineEventHandler<AuthResponse>(async (event) => {
       code,
       client_id: config.oauthGoogleId,
       client_secret: config.oauthGoogleSecret,
-      redirect_uri: mapURL(config.oauthGoogleRedirect, config.apiURL, event)
+      redirect_uri: mapURL(config.oauthGoogleRedirect, config.apiUrl, event)
     })
 
     try {
       const payload = { email: OAuthUser.email }
       const user = await ofetch('/user/webhook', {
-        baseURL: mapURL(config.apiURL, config.apiURL, event),
+        baseURL: mapURL(config.apiUrl, config.apiUrl, event),
         method: 'GET',
         headers: { 'Signature': `${createSignature(payload, config.authWebhook)}` },
         query: payload
