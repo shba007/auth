@@ -4,7 +4,7 @@ export default defineEventHandler<string>(async (event) => {
 
     return getGoogleOAuthURL(
       config.oauthGoogleId,
-      mapURL(config.oauthGoogleRedirect, config.apiURL, event)
+      mapURL(config.oauthGoogleRedirect, config.apiUrl, event)
     )
   } catch (error: any) {
     console.error("Auth oauth/google GET", error)

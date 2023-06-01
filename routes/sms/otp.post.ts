@@ -40,7 +40,7 @@ export default defineEventHandler<Omit<AuthResponse, 'user'>>(async (event) => {
         // Check if user phone number already exists
         const payload = { phone: phone }
         const response = await ofetch('/user/webhook', {
-          baseURL: mapURL(config.apiURL, config.apiURL, event),
+          baseURL: mapURL(config.apiUrl, config.apiUrl, event),
           method: 'GET',
           headers: { 'Signature': `${createSignature(payload, config.authWebhook)}` },
           query: payload
@@ -63,8 +63,7 @@ export default defineEventHandler<Omit<AuthResponse, 'user'>>(async (event) => {
       otp = parseInt(config.testOTP)
     } else {
       otp = generateOTP()
-      // FIXME: Uncomment
-      // await sendOTP(otp, parseInt(phone))
+      await sendOTP(otp, parseInt(phone))
     }
 
     const retryCount = phoneStatus == null ? 0 : ++phoneStatus.retryCount
@@ -84,6 +83,9 @@ export default defineEventHandler<Omit<AuthResponse, 'user'>>(async (event) => {
     return { isRegistered: false, token: { auth: authToken } }
   } catch (error: any) {
     console.error("Auth sms/otp POST", error)
+
+    if (error == 'jwt expired')
+      throw createError({ statusCode: 401, statusMessage: "Token Expired" })
 
     throw createError({ statusCode: 500, statusMessage: "Some Unknown Error Found" })
   }

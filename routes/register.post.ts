@@ -30,7 +30,7 @@ export default defineProtectedEventHandler<Omit<AuthResponse, 'user'>>(async (ev
 
     // create new account
     const response = await ofetch('/user/webhook', {
-      baseURL: mapURL(config.apiURL, config.apiURL, event),
+      baseURL: mapURL(config.apiUrl, config.apiUrl, event),
       method: 'POST',
       headers: { 'Signature': `${createSignature(payload, config.authWebhook)}` },
       body: payload
