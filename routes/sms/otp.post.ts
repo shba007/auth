@@ -6,6 +6,9 @@ export default defineEventHandler<Omit<AuthResponse, 'user'>>(async (event) => {
   const storage = useStorage()
   const { action, phone } = await readBody<{ action: 'login' | 'register', phone: string }>(event)
 
+  if (action === undefined || phone === undefined)
+    throw createError({ statusCode: 400, statusMessage: "Action or Phone field is undefined" })
+
   let phoneStatus = await storage.getItem(`phone:${phone}`) as PhoneStatus
   // Handle all Errors
   if (phoneStatus && new Date(phoneStatus.retryTimeout).getTime() > new Date().getTime()) {
@@ -63,7 +66,8 @@ export default defineEventHandler<Omit<AuthResponse, 'user'>>(async (event) => {
       otp = parseInt(config.testOTP)
     } else {
       otp = generateOTP()
-      await sendOTP(otp, parseInt(phone))
+      // FIXME: Uncomment
+      // await sendOTP(otp, parseInt(phone))
     }
 
     const retryCount = phoneStatus == null ? 0 : ++phoneStatus.retryCount
