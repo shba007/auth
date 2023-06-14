@@ -23,6 +23,7 @@ export default defineNitroConfig({
     oauthGoogleSecret: '',
     oauthGoogleRedirect: '',
     smsSecret: '',
+    smsSend: '',
     testPhone: '',
     testOTP: '',
   },

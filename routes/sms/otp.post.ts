@@ -66,15 +66,16 @@ export default defineEventHandler<Omit<AuthResponse, 'user'>>(async (event) => {
       otp = parseInt(config.testOTP)
     } else {
       otp = generateOTP()
-      await sendOTP(otp, parseInt(phone))
+      if (config.sendOTP)
+        await sendOTP(otp, parseInt(phone))
     }
 
     const retryCount = phoneStatus == null ? 0 : ++phoneStatus.retryCount
     phoneStatus = {
       otp,
-      otpTimeout: getExpiryTimeFromNow({ minute: 3 }),
+      otpTimeout: addTimeToNow({ minute: 3 }),
       retryCount,
-      retryTimeout: getExpiryTimeFromNow(retryCount >= 3 ? { hour: 3 } : { minute: 1, second: 25 }),
+      retryTimeout: addTimeToNow(retryCount >= 3 ? { hour: 3 } : { minute: 1, second: 25 }),
       verified: false
     }
 
