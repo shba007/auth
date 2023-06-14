@@ -81,7 +81,7 @@ export async function getGoogleUser({ code, client_id, client_secret, redirect_u
   }
 }
 
-export function getExpiryTimeFromNow({ days = 0, hour = 0, minute = 0, second = 0 }: { days?: number, hour?: number, minute?: number, second?: number }): string {
+export function addTimeToNow({ days = 0, hour = 0, minute = 0, second = 0 }: { days?: number, hour?: number, minute?: number, second?: number }): string {
   const millisecond = ((((days) * 24 + hour) * 60 + minute) * 60 + second) * 1000
 
   return new Date(new Date().getTime() + millisecond).toISOString().slice(0, -5) + "Z"
