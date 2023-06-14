@@ -66,7 +66,7 @@ export default defineEventHandler<Omit<AuthResponse, 'user'>>(async (event) => {
       otp = parseInt(config.testOTP)
     } else {
       otp = generateOTP()
-      if (config.sendOTP)
+      if (config.smsSend)
         await sendOTP(otp, parseInt(phone))
     }
 
