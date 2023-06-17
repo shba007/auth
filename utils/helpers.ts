@@ -88,7 +88,7 @@ export function addTimeToNow({ days = 0, hour = 0, minute = 0, second = 0 }: { d
 }
 
 enum TokenType {
-  'auth' = '3m',
+  'auth' = '30m',
   'refresh' = '',
   'access' = '3m'
 }
