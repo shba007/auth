@@ -66,16 +66,16 @@ export default defineEventHandler<Omit<AuthResponse, 'user'>>(async (event) => {
       otp = parseInt(config.testOTP)
     } else {
       otp = generateOTP()
-      if (config.sendOTP)
+      if (config.smsSend)
         await sendOTP(otp, parseInt(phone))
     }
 
     const retryCount = phoneStatus == null ? 0 : ++phoneStatus.retryCount
     phoneStatus = {
       otp,
-      otpTimeout: addTimeToNow({ minute: 3 }),
+      otpTimeout: addTimeToNow({ minute: 5 }),
       retryCount,
-      retryTimeout: addTimeToNow(retryCount >= 3 ? { hour: 3 } : { minute: 1, second: 25 }),
+      retryTimeout: addTimeToNow(retryCount >= 3 ? { hour: 3 } : { second: 30 }),
       verified: false
     }
 
@@ -84,7 +84,12 @@ export default defineEventHandler<Omit<AuthResponse, 'user'>>(async (event) => {
 
     const authToken = createJWTToken('auth', user.id, config.authSecret)
 
-    return { isRegistered: false, token: { auth: authToken } }
+    return {
+      isRegistered: false,
+      timeoutAt: phoneStatus.otpTimeout,
+      retryTimeoutAt: phoneStatus.retryTimeout,
+      token: { auth: authToken }
+    }
   } catch (error: any) {
     console.error("Auth sms/otp POST", error)
 
