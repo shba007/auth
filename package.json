@@ -15,12 +15,12 @@
   },
   "devDependencies": {
     "@types/jsonwebtoken": "^9.0.2",
-    "prisma": "^4.15.0"
+    "prisma": "^4.16.2"
   },
   "dependencies": {
-    "@prisma/client": "^4.15.0",
+    "@prisma/client": "^4.16.2",
     "jsonwebtoken": "^9.0.0",
-    "nitropack": "^2.4.1",
-    "ofetch": "^1.1.0"
+    "nitropack": "^2.5.2",
+    "ofetch": "^1.1.1"
   }
 }
