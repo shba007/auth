@@ -11,16 +11,17 @@
     "preview": "node .output/server/index.mjs",
     "postinstall": "prisma generate",
     "clean": "rm -r .nitro .output",
-    "start": "node .output/server/index.mjs"
+    "start": "node .output/server/index.mjs",
+    "test": "npx ts-node --project tsconfig.json --compiler-options \"{\\\"module\\\": \\\"commonjs\\\", \\\"allowSyntheticDefaultImports\\\": true}\" tests/refreshToken.test.ts"
   },
   "devDependencies": {
-    "@types/jsonwebtoken": "^9.0.2",
-    "prisma": "^4.16.2"
+    "@types/jsonwebtoken": "^9.0.3",
+    "prisma": "^5.4.2"
   },
   "dependencies": {
-    "@prisma/client": "^4.16.2",
-    "jsonwebtoken": "^9.0.0",
-    "nitropack": "^2.5.2",
-    "ofetch": "^1.1.1"
+    "@prisma/client": "^5.4.2",
+    "jsonwebtoken": "^9.0.2",
+    "nitropack": "^2.6.3",
+    "ofetch": "^1.3.3"
   }
 }
