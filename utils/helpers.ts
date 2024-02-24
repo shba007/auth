@@ -102,7 +102,7 @@ export function createJWTToken(type: 'auth' | 'refresh' | 'access', id: string, 
 }
 
 export function mapURL(dict: any, urlMap: any, event: any) {
-  const origin = event.node.req.headers.origin;
+  const origin = event.node.req.headers.origin ?? "http://localhost:4000";
 
   const type = Object.keys(urlMap).find(key => urlMap[key] === `${origin}/api`);
 
