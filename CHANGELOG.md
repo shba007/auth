@@ -1,5 +1,11 @@
 # auth-service
 
+## 0.2.2
+
+### Patch Changes
+
+- 2735122: chore: pkgs updated
+
 ## 0.2.1
 
 ### Patch Changes
