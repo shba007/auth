@@ -1,5 +1,11 @@
 # auth-service
 
+## 0.2.3
+
+### Patch Changes
+
+- cc7b577: chore: pkgs updated & ci/cd updated
+
 ## 0.2.2
 
 ### Patch Changes
