@@ -22,7 +22,7 @@ COPY --from=builder /app/.output ./.output
 COPY --from=builder /app/*.yml ./
 
 ENV NODE_ENV=production
-ENV NUXT_APP_VERSION=$VERSION
+ENV NITRO_APP_VERSION=$VERSION
 
 EXPOSE 3000
 

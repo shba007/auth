@@ -16,6 +16,9 @@ export default defineNitroConfig({
     }
   },
   runtimeConfig: {
+    app: {
+      version: '',
+    },
     apiUrl: '',
     corsUrl: '',
     authAccessSecret: '',
