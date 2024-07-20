@@ -1,5 +1,11 @@
 # auth-service
 
+## 0.3.0
+
+### Minor Changes
+
+- a3cc9bf: chore: containerized
+
 ## 0.2.3
 
 ### Patch Changes
