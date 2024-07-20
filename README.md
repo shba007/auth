@@ -3,6 +3,7 @@
 <p>
 
 # Auth Service
+
 > Global Auth Service
 
 <p align="center">
@@ -10,8 +11,6 @@
     <img src="https://uptime.betterstack.com/status-badges/v3/monitor/10kju.svg" alt="uptime status">
   </a>
 </p>
-
-![Landing](public/previews/landing.webp)
 
 # TODO
 - Rate Limiting
