@@ -1,5 +1,11 @@
 # auth-service
 
+## 0.3.2
+
+### Patch Changes
+
+- e6763fd: chore: formatting & housekeeping
+
 ## 0.3.1
 
 ### Patch Changes

@@ -2,7 +2,7 @@
   "name": "api-auth",
   "description": "Global REST API Authentication Service",
   "author": "Shirsendu Bairagi <shirsendu2001@gmail.com>",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "private": true,
   "type": "module",
   "engines": {
