@@ -1,6 +1,6 @@
-import { randomUUID } from "crypto";
+import { randomUUID } from 'crypto'
 
-export default defineEventHandler<Promise<{ accessToken: string, refreshToken: string }>>(async (event) => {
+export default defineEventHandler<Promise<{ accessToken: string; refreshToken: string }>>(async (event) => {
   try {
     const config = useRuntimeConfig()
     const uuid = randomUUID()
@@ -12,15 +12,15 @@ export default defineEventHandler<Promise<{ accessToken: string, refreshToken: s
       email: null,
       phone: null,
       dob: null,
-      gender: null
+      gender: null,
     }
 
     // create new account
     const response = await ofetch('/user/webhook', {
       baseURL: mapURL(config.apiUrl, config.apiUrl, event),
       method: 'POST',
-      headers: { 'Signature': `${createSignature(payload, config.authWebhook)}` },
-      body: payload
+      headers: { Signature: `${createSignature(payload, config.authWebhook)}` },
+      body: payload,
     })
 
     const accessToken = createJWTToken('access', response.id, config.authAccessSecret)
@@ -28,8 +28,11 @@ export default defineEventHandler<Promise<{ accessToken: string, refreshToken: s
 
     return { accessToken, refreshToken }
   } catch (error: any) {
-    console.error("Auth anonymous GET", error)
+    console.error('Auth anonymous GET', error)
 
-    throw createError({ statusCode: 500, statusMessage: 'Some Unknown Error Found' })
+    throw createError({
+      statusCode: 500,
+      statusMessage: 'Some Unknown Error Found',
+    })
   }
 })

@@ -8,7 +8,7 @@ export default defineEventHandler<AuthResponse>(async (event) => {
       code,
       client_id: config.oauthGoogleId,
       client_secret: config.oauthGoogleSecret,
-      redirect_uri: mapURL(config.oauthGoogleRedirect, config.apiUrl, event)
+      redirect_uri: mapURL(config.oauthGoogleRedirect, config.apiUrl, event),
     })
 
     try {
@@ -16,8 +16,10 @@ export default defineEventHandler<AuthResponse>(async (event) => {
       const user = await ofetch('/user/webhook', {
         baseURL: mapURL(config.apiUrl, config.apiUrl, event),
         method: 'GET',
-        headers: { 'Signature': `${createSignature(payload, config.authWebhook)}` },
-        query: payload
+        headers: {
+          Signature: `${createSignature(payload, config.authWebhook)}`,
+        },
+        query: payload,
       })
 
       const accessToken = createJWTToken('access', user.id, config.authAccessSecret)
@@ -26,7 +28,7 @@ export default defineEventHandler<AuthResponse>(async (event) => {
       return {
         isRegistered: true,
         token: { access: accessToken, refresh: refreshToken },
-        user: user
+        user: user,
       }
     } catch (error: any) {
       if (error.statusCode === 404) {
@@ -45,18 +47,19 @@ export default defineEventHandler<AuthResponse>(async (event) => {
           token: { auth: authToken },
           user: {
             name: user.name,
-            email: user.email
-          }
+            email: user.email,
+          },
         }
-      } else
-        throw error
+      } else throw error
     }
   } catch (error: any) {
-    console.error("Auth oauth/google POST", error)
+    console.error('Auth oauth/google POST', error)
 
-    if (error.statusCode === 404)
-      throw error
+    if (error.statusCode === 404) throw error
 
-    throw createError({ statusCode: 500, statusMessage: 'Some Unknown Error Found' })
+    throw createError({
+      statusCode: 500,
+      statusMessage: 'Some Unknown Error Found',
+    })
   }
 })

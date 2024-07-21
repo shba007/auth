@@ -1,22 +1,25 @@
-import { randomUUID } from "crypto";
+import { randomUUID } from 'crypto'
 
 export default defineProtectedEventHandler<Omit<AuthResponse, 'user'>>(async (event, user) => {
   const config = useRuntimeConfig()
   const storage = useStorage()
 
   try {
-    const phoneStatus = await storage.getItem(`phone:${user.phone}`) as PhoneStatus | null
+    const phoneStatus = (await storage.getItem(`phone:${user.phone}`)) as PhoneStatus | null
 
     if (!(user && phoneStatus && phoneStatus.verified))
-      throw createError({ statusCode: 400, statusMessage: "OAuth or SMS Login first" })
+      throw createError({
+        statusCode: 400,
+        statusMessage: 'OAuth or SMS Login first',
+      })
 
     const body = await readBody<{
-      name: string | null,
-      image: string | null,
-      email: string | null,
-      dob: string,
+      name: string | null
+      image: string | null
+      email: string | null
+      dob: string
       gender: string
-    }>(event);
+    }>(event)
     const payload = {
       id: randomUUID(),
       name: user.name ?? body.name,
@@ -24,34 +27,44 @@ export default defineProtectedEventHandler<Omit<AuthResponse, 'user'>>(async (ev
       email: user.email ?? body.email,
       phone: user.phone,
       dob: body.dob,
-      gender: body.gender
+      gender: body.gender,
     }
-    console.log({ user: payload });
+    console.log({ user: payload })
 
     // create new account
     const response = await ofetch('/user/webhook', {
       baseURL: mapURL(config.apiUrl, config.apiUrl, event),
       method: 'POST',
-      headers: { 'Signature': `${createSignature(payload, config.authWebhook)}` },
-      body: payload
+      headers: {
+        Signature: `${createSignature(payload, config.authWebhook)}`,
+      },
+      body: payload,
     })
 
     // Reset retryCount
-    phoneStatus.retryCount = 0;
-    phoneStatus.verified = true;
-    await storage.setItem(`phone:${user.phone}`, phoneStatus);
+    phoneStatus.retryCount = 0
+    phoneStatus.verified = true
+    await storage.setItem(`phone:${user.phone}`, phoneStatus)
 
     const accessToken = createJWTToken('access', response.id, config.authAccessSecret)
     const refreshToken = createJWTToken('refresh', response.id, config.authRefreshSecret)
 
-    return { isRegistered: true, token: { access: accessToken, refresh: refreshToken } }
+    return {
+      isRegistered: true,
+      token: { access: accessToken, refresh: refreshToken },
+    }
   } catch (error: any) {
-    if (error.statusCode === 400)
-      throw error
+    if (error.statusCode === 400) throw error
     else if (error.statusCode === 409)
-      throw createError({ statusCode: 409, statusMessage: "Phone or Email already exists" })
+      throw createError({
+        statusCode: 409,
+        statusMessage: 'Phone or Email already exists',
+      })
 
-    console.error("Auth register POST", error)
-    throw createError({ statusCode: 500, statusMessage: "Some Unknown Error Found" })
+    console.error('Auth register POST', error)
+    throw createError({
+      statusCode: 500,
+      statusMessage: 'Some Unknown Error Found',
+    })
   }
 })
